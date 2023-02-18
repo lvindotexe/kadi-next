@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "esNext",
+        "outDir": "./prebuild",
+        "esModuleInterop": true,
+        "strict": false,
+        "module": "nodenext",
+        "skipLibCheck": true,
+        "typeRoots": [
+            "./types",
+            "./node_modules/@types"
+        ]
+    },
+    "include": [
+        "./src/scripts/prebuild.ts"
+    ],
+    "exclude": [
+        "pages",
+        "hooks",
+        "components",
+        "**/*test.ts",
+        "**/*spec.ts"
+    ]
+}
