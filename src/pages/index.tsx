@@ -42,7 +42,7 @@ const Home: NextPage = () => {
 
   const { data, status } = useQuery(["weapons"], () =>
     fetch("/api/WeaponsLite").then(
-      (response) => response.json() as WeaponLite[]
+      (response) => response.json() as Promise<WeaponLite[]>
     )
   );
   return (
