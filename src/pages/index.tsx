@@ -11,6 +11,7 @@ type ItemIcon = {
 };
 
 export function ItemIcon({ item }: { item: ItemIcon }) {
+  console.log(process.env.NEXT_PUBLIC_BUNGIE_URL! + item.iconWatermark);
   //basic: #c2bbb3
   //rare: #4f76a2
   //common: #366f42
@@ -38,7 +39,7 @@ export function ItemIcon({ item }: { item: ItemIcon }) {
 }
 
 const Home: NextPage = () => {
-  console.log(process.env.BUNGIE_URL);
+  console.log(process.env.NEXT_PUBLIC_BUNGIE_URL);
 
   const { data, status } = useQuery(["weapons"], () =>
     fetch("/api/WeaponsLite").then(

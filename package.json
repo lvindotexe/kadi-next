@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "testbuild": "npm run prebuild && npm run build && npm run start",
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
