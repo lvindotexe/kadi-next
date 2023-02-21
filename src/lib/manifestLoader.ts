@@ -106,7 +106,7 @@ function transformWeaponLite(
     summaryItemHash: item.summaryItemHash!,
     defaultDamageType: item.defaultDamageTypeHash!,
     itemCategory: item.itemCategoryHashes!,
-    stats: new Map(
+    stats: Object.fromEntries(
       item.investmentStats.map((e) => [e.statTypeHash, e.value] as const)
     ),
     perks: getPerkHashes(item, plugSets, mods),
@@ -262,7 +262,15 @@ export function loadManifest() {
         )! as DestinyPlugSetDefinition[],
       ];
       const liteWeapons = [];
+      const weaponCategoryStatGroupMap = new Map<number, number>();
+      function addToStatGroupMap(item: DestinyInventoryItemDefinition) {
+        for (const cat of item.itemCategoryHashes!) {
+          if (weaponCategoryStatGroupMap.has(cat)) continue;
+          else weaponCategoryStatGroupMap.set(cat, item.stats!.statGroupHash!);
+        }
+      }
       for (const weapon of weapons) {
+        addToStatGroupMap(weapon);
         const result = transformWeaponLite(
           weapon,
           categorisedItems,
@@ -275,7 +283,9 @@ export function loadManifest() {
       return [
         manifestTables,
         categorisedItems,
-        new Map().set("WeaponsLite", liteWeapons),
+        new Map()
+          .set("WeaponsLite", liteWeapons)
+          .set("WeaponCategoryStatGroupMap", weaponCategoryStatGroupMap),
       ] as const;
     });
 }

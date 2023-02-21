@@ -1,6 +1,6 @@
-import { loadManifest } from "../lib/manifestLoader.js";
 import fs from "fs";
-import path, { dirname } from "path";
+import path from "path";
+import { loadManifest } from "../lib/manifestLoader.js";
 
 (async function main() {
   await loadManifest().then((result) => {
@@ -8,7 +8,7 @@ import path, { dirname } from "path";
       for (const [k, v] of table) {
         fs.writeFileSync(
           path.resolve() + "/public/" + k + ".json",
-          JSON.stringify(v)
+          JSON.stringify(v instanceof Map ? Object.fromEntries(v) : v)
         );
       }
     });

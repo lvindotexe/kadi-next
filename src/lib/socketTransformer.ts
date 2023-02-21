@@ -243,16 +243,10 @@ function getPerkSets(
   plugSets: DestinyPlugSetDefinition[],
   weaponMods: DestinyInventoryItemDefinition[]
 ) {
-  return (
-    filteredSocketEntries(item.sockets, 4241085061)
-      .filter((entry) => entry.singleInitialItemHash != 2285418970)
-      .map(
-        (entry) => entry?.randomizedPlugSetHash || entry?.reusablePlugSetHash
-      )
-      //@ts-ignore
-      .filter(isNotNullOrUndefined)
-      .map((setHash) => getPlugItems(setHash!, plugSets, weaponMods))
-  );
+  return filteredSocketEntries(item.sockets, 4241085061)
+    .filter((entry) => entry.singleInitialItemHash != 2285418970)
+    .map((entry) => entry?.randomizedPlugSetHash || entry?.reusablePlugSetHash)
+    .map((setHash) => getPlugItems(setHash!, plugSets, weaponMods));
 }
 
 export function getPerkHashes(
@@ -265,28 +259,34 @@ export function getPerkHashes(
   );
 }
 
+type Perks = Weapon["perks"];
+
 export function getDetailedPerkSets(
   item: DestinyInventoryItemDefinition,
   plugSets: DestinyPlugSetDefinition[],
   weaponMods: DestinyInventoryItemDefinition[],
   statDefs: DestinyStatDefinition[]
-) {
+): Weapon["perks"] {
   return getPerkSets(item, plugSets, weaponMods)
     .filter((set) => set.length > 0)
     .map((set) => ({
       type: set[0]!.itemTypeDisplayName,
-      items: set.reduce(
-        (acc, e) =>
-          acc.set(e.hash, {
-            description: e.displayProperties.description,
-            hash: e.hash,
-            icon: e.displayProperties.icon,
-            investmentStats: [...getInvestmentStatsLite(e, statDefs).values()],
-            kind: "Trait",
-            name: e.displayProperties.name,
-            currentlyCanRoll: e.currentlyCanRoll,
-          }),
-        new Map<number, Trait>()
+      items: Object.fromEntries(
+        set.reduce(
+          (acc, e) =>
+            acc.set(e.hash, {
+              description: e.displayProperties.description,
+              hash: e.hash,
+              icon: e.displayProperties.icon,
+              investmentStats: [
+                ...getInvestmentStatsLite(e, statDefs).values(),
+              ],
+              kind: "Trait",
+              name: e.displayProperties.name,
+              currentlyCanRoll: e.currentlyCanRoll,
+            }),
+          new Map<number, Trait>()
+        )
       ),
     }));
 }

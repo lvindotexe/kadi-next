@@ -13,7 +13,7 @@ export type WeaponSocketMod<T extends WeaponSocketModKind> = BaseItem & {
   kind: T;
   icon: string;
   description: string;
-  investmentStats: Weapon["investmentStats"] extends Map<number, infer U>
+  investmentStats: Weapon["investmentStats"] extends Record<number, infer U>
     ? Omit<U, "displayInterpolation">[]
     : never;
 };
@@ -58,7 +58,7 @@ export type WeaponLite = BaseItem & {
   summaryItemHash: number;
   defaultDamageType: number;
   itemCategory: number[];
-  stats: Map<number, number>;
+  stats: Record<number, number>;
 };
 
 //TODO itemtype,exotic legendary etc
@@ -71,14 +71,14 @@ export type Weapon = BaseItem & {
   };
   perks: {
     type: string;
-    items: Map<number, Trait>;
+    items: Record<number, Trait>;
   }[];
   icon: string;
   iconWatermark: string;
   iconWatermarkShelved: string;
   flavourText: string;
   itemTypeAndTierDisplayName: string;
-  investmentStats: Map<
+  investmentStats: Record<
     number,
     {
       displayInterpolation: InterpolationPoint[];

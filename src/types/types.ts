@@ -4,8 +4,10 @@ import {
   DestinyPlugSetDefinition,
   DestinyStatGroupDefinition,
   DestinySandboxPerkDefinition,
+  AllDestinyManifestComponents,
 } from "bungie-api-ts/destiny2";
-import { WeaponLite } from "./weaponTypes.js";
+import { ArrayOfPrimitivesOrObject, FlattenArray } from "../hooks/search.js";
+import { Weapon, WeaponLite } from "./weaponTypes.js";
 
 export const weaponTierOneMasterwork = [
   518224747, 150943607, 1486919755, 4283235143, 2942552113, 1590375901,
@@ -16,18 +18,104 @@ export const weaponTierOneMasterwork = [
 ];
 
 export type DatabaseTables = {
-  WeaponLite: WeaponLite[];
+  WeaponsLite: WeaponLite[];
   Ornaments: DestinyInventoryItemDefinition[];
   Weapons: DestinyInventoryItemDefinition[];
   Traits: DestinyInventoryItemDefinition[];
   MasterWork: DestinyInventoryItemDefinition[];
   Catalysts: DestinyInventoryItemDefinition[];
-  DestinyStatDefinition: DestinyStatDefinition[];
-  DestinyPlugSetDefinition: DestinyPlugSetDefinition[];
-  DestinyStatGroupDefinition: DestinyStatGroupDefinition[];
   WeaponMods: DestinyInventoryItemDefinition[];
-  DestinySandboxPerkDefinition: DestinySandboxPerkDefinition[];
-  WeaponCategoryStatGroupMap: Map<number, number>;
+  WeaponCategoryStatGroupMap: Record<number, number>;
+} & Record<
+  keyof AllDestinyManifestComponents,
+  Array<
+    AllDestinyManifestComponents[keyof AllDestinyManifestComponents][number]
+  >
+>;
+
+export type FilterImplementation<T extends keyof WeaponLite> = (
+  types: ArrayOfPrimitivesOrObject<FlattenArray<WeaponLite[T]>>,
+  property: WeaponLite[T]
+) => boolean;
+
+export type WeaponLitePropertyHash<T extends keyof WeaponLite> = {
+  filterImplementation: FilterImplementation<T>;
+} & { proertyHashes: Record<string, number>; propertyName: T };
+
+export const defaultDamageTypes: WeaponLitePropertyHash<"defaultDamageType"> = {
+  propertyName: "defaultDamageType",
+  proertyHashes: {
+    kinetic: 3373582085,
+    stasis: 151347233,
+    solar: 1847026933,
+    arc: 2303181850,
+    void: 3454344768,
+  },
+  filterImplementation: (possibleprops, property) =>
+    possibleprops.includes(property),
+};
+
+export const equipmentSlotTypes: WeaponLitePropertyHash<"equipmentSlotTypeHash"> =
+  {
+    propertyName: "equipmentSlotTypeHash",
+    proertyHashes: {
+      primary: 1498876634,
+      energy: 2465295065,
+      power: 953998645,
+    },
+    filterImplementation: (possibleProps, property) =>
+      possibleProps.includes(property),
+  };
+
+export const ammoTypes: WeaponLitePropertyHash<"ammoType"> = {
+  propertyName: "ammoType",
+  proertyHashes: {
+    primary: 1,
+    special: 2,
+    power: 3,
+  },
+  filterImplementation: (possibleprops, property) =>
+    possibleprops.includes(property),
+};
+
+export const archeTypes: WeaponLitePropertyHash<"itemCategory"> = {
+  propertyName: "itemCategory",
+  proertyHashes: {
+    pulse: 7,
+    handcannon: 6,
+    glaives: 3871742104,
+    trace: 2489664120,
+    scout: 8,
+    autotrifle: 5,
+    sword: 54,
+    rocket: 13,
+    submachine: 3954685534,
+    machinegun: 12,
+    sidearm: 14,
+    shotgun: 11,
+    sniper: 10,
+    grenadelaunchers: 153950757,
+    bows: 3317538576,
+    fusion: 9,
+    linear: 1504945536,
+  },
+  filterImplementation: (properties, property) =>
+    properties.some((e) => property.includes(e)),
+};
+
+export const tiertype: WeaponLitePropertyHash<"tierTypeHash"> = {
+  propertyName: "tierTypeHash",
+  proertyHashes: {
+    //basic: 0,
+    //otherBasic: 3340296461,
+    rare: 2127292149,
+    common: 2395677314,
+    exotic: 2759499571,
+    // otherOtherBasic: 1801258597,
+    legendary: 4008398120,
+  },
+  filterImplementation: (possibleProps, property) =>
+    possibleProps.includes(property),
 };
 
 export const basicStatDefinitions = [
@@ -164,52 +252,3 @@ export const basicStatDefinitions = [
     name: "Strength",
   },
 ];
-
-export const damageTypes = {
-  kinetic: 3373582085,
-  stasis: 151347233,
-  solar: 1847026933,
-  arc: 2303181850,
-  void: 3454344768,
-} as const;
-export const equipmentSlotType = {
-  primary: 1498876634,
-  energy: 2465295065,
-  power: 953998645,
-} as const;
-
-export const ammoType = {
-  primary: 1,
-  special: 2,
-  power: 3,
-} as const;
-
-export const archeType = {
-  pulse: 7,
-  handcannon: 6,
-  glaives: 3871742104,
-  trace: 2489664120,
-  scout: 8,
-  autotrifle: 5,
-  sword: 54,
-  rocket: 13,
-  submachine: 3954685534,
-  machinegun: 12,
-  sidearm: 14,
-  shotgun: 11,
-  sniper: 10,
-  grenadelaunchers: 153950757,
-  bows: 3317538576,
-  fusion: 9,
-  linear: 1504945536,
-} as const;
-
-export const tiertype = {
-  //basic: 0,
-  //otherBasic: 3340296461,
-  rare: 2127292149,
-  common: 2395677314,
-  exotic: 2759499571,
-  // otherOtherBasic: 1801258597,
-  legendary: 4008398120,
-};
