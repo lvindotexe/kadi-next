@@ -11,10 +11,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { useWeaponSearch } from "../../hooks/search";
-import { debounce, getManifestTables } from "../../lib/utils";
-import { WeaponLitePropertyHash } from "../../types/types";
-import { WeaponLite } from "../../types/weaponTypes";
+import { useWeaponSearch, debounce } from "../hooks/search";
+import { getManifestTables } from "../lib/utils";
+import { WeaponLitePropertyHash } from "../types/types";
+import { WeaponLite } from "../types/weaponTypes";
 
 type ToggleGroupProps<T extends keyof WeaponLite> = {
   title: string;

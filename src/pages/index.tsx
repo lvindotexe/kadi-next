@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { WeaponLite } from "../types/weaponTypes";
 import { useWeaponSearch } from "../hooks/search";
 import { debounce, generateHttpClient } from "../lib/utils";
-import { ToggleGroup, ToggleStatGroup } from "./components/Navbar";
 import {
   ammoTypes,
   archeTypes,
@@ -14,6 +13,7 @@ import {
 } from "../types/types";
 import { useMemo, useState } from "react";
 import { getDestinyManifest } from "bungie-api-ts/destiny2";
+import { ToggleGroup, ToggleStatGroup } from "../components/Navbar";
 
 type ItemIcon = {
   iconWatermark?: string;
