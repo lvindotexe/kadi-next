@@ -81,8 +81,10 @@ export function ToggleItem<
   const handleClick = () => {
     setSelected(!selected);
     selectedItemsRef.current = !selected
-      ? selectedItemsRef.current.concat([hash])
+      ? //@ts-ignore fixme
+        selectedItemsRef.current.concat([hash])
       : selectedItemsRef.current.filter((e) => e !== hash);
+    //@ts-ignore
     debouncedSetter(selectedItemsRef.current);
   };
   return (
