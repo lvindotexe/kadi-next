@@ -3,9 +3,10 @@ import {
   DestinyManifest,
 } from "bungie-api-ts/destiny2";
 import { HttpClientConfig } from "bungie-api-ts/http";
+import exp from "constants";
+import { set } from "idb-keyval";
+import { Url } from "url";
 import { DatabaseTables } from "../types/types.js";
-
-type ToArray<T> = T extends any ? T[] : never;
 
 export function isNotNullOrUndefined<T extends object>(
   input: null | undefined | T
@@ -60,8 +61,6 @@ function getManifestTable<T extends keyof AllDestinyManifestComponents>(
     );
 }
 
-type pain = AllDestinyManifestComponents["DestinyActivityDefinition"][number][];
-
 export function getManifestTables<T extends keyof DatabaseTables>(tables: T[]) {
   return tables
     .map(async (tableName) =>
@@ -87,4 +86,13 @@ export function getManifestTables<T extends keyof DatabaseTables>(tables: T[]) {
       awaitedAcc.set(tableName, data);
       return awaitedAcc;
     }, Promise.resolve(new Map<T, DatabaseTables[T]>()));
+}
+
+export function fetchAndCache(urlString: string, cacheKey: string) {
+  return fetch(urlString)
+    .then((r) => r.json())
+    .then((json) => {
+      set(cacheKey, json);
+      return json;
+    });
 }

@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { get } from "idb-keyval";
 import Head from "next/head";
 
 import { useQuery } from "@tanstack/react-query";
@@ -6,9 +7,20 @@ import { getDestinyManifest } from "bungie-api-ts/destiny2";
 import { useMemo, useRef, useState } from "react";
 import { NavBar, NavBarSearchInput } from "../components/Navbar";
 import { useWeaponSearch } from "../hooks/search";
-import { generateHttpClient } from "../lib/utils";
+import { fetchAndCache, generateHttpClient } from "../lib/utils";
 import { WeaponLite } from "../types/weaponTypes";
 import Link from "next/link";
+
+export function initialiseHomePage() {
+  //@ts-ignore fix me
+  return get("WeaponsLite").then((result) => {
+    if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
+    else
+      return fetchAndCache("/api/WeaponsLite", "WeaponsLite") as Promise<
+        WeaponLite[]
+      >;
+  });
+}
 
 type ItemIconProps = {
   iconWatermark?: string;
@@ -48,7 +60,7 @@ function WeaponGrid({ weapons }: { weapons: WeaponLite[] }) {
     <>
       <ul className="grid grid-cols-[repeat(auto-fill,minmax(4rem,max-content))] justify-around gap-2">
         {weapons.map((w) => (
-          <li>
+          <li key={w.hash}>
             <Link href={`/w/${w.hash}`}>
               <ItemIcon key={w.hash} item={w} />
             </Link>
@@ -92,13 +104,13 @@ const Home: NextPage = () => {
     []
   );
   const { status, data } = useQuery(["manifestversion"], () =>
-    getDestinyManifest(httpClient)
-      .then((result) => result.Response)
-      .then((response) => {
-        localStorage.setItem("manifest", JSON.stringify(response));
-      })
-      .then(() => fetch("/api/WeaponsLite"))
-      .then((response) => response.json() as Promise<WeaponLite[]>)
+    get("WeaponsLite").then((result) => {
+      if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
+      else
+        return fetchAndCache("/api/WeaponsLite", "WeaponsLite") as Promise<
+          WeaponLite[]
+        >;
+    })
   );
 
   return (
