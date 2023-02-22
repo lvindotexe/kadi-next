@@ -3,18 +3,29 @@ import {
   DestinyStatDefinition,
   DestinyStatGroupDefinition,
 } from "bungie-api-ts/destiny2";
-import {
+import React, {
+  Children,
+  Dispatch,
+  forwardRef,
   MutableRefObject,
+  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { useWeaponSearch, debounce } from "../hooks/search";
-import { getManifestTables } from "../lib/utils";
-import { WeaponLitePropertyHash } from "../types/types";
+import { useWeaponSearch } from "../hooks/search";
+import { debounce, getManifestTables } from "../lib/utils";
+import {
+  ammoTypes,
+  archeTypes,
+  defaultDamageTypes,
+  equipmentSlotTypes,
+  WeaponLitePropertyHash,
+} from "../types/types";
 import { WeaponLite } from "../types/weaponTypes";
+import { IconArrowUp, IconCircleX } from "@tabler/icons-react";
 
 type ToggleGroupProps<T extends keyof WeaponLite> = {
   title: string;
@@ -337,3 +348,146 @@ const SortByOption: React.FC<SortByProps> = ({
     />
   );
 };
+
+export function NavBarTextLogo() {
+  return <p className="text-center text-2xl font-bold">Kadi-One</p>;
+}
+
+export const NavBarSearchInput = forwardRef<
+  HTMLInputElement,
+  Omit<
+    React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLInputElement>,
+      HTMLInputElement
+    >,
+    "type" | "onChange"
+  > & { setInput: (input: string) => void }
+>(({ setInput, ...rest }, ref) => {
+  const debouncedInput = debounce(setInput, 100);
+  return (
+    <input
+      ref={ref}
+      type="text"
+      {...rest}
+      onChange={(e) => {
+        debouncedInput(e.target.value.toLowerCase());
+      }}
+    />
+  );
+});
+
+export function NavBarButton({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="items-center text-black">
+      {children}
+    </button>
+  );
+}
+
+export function BackToTop() {
+  return (
+    <button
+      onClick={() => (document.body.scrollTop = 0)}
+      className="padding-2 bg-black"
+    >
+      <IconArrowUp size={24} color="white" />
+    </button>
+  );
+}
+
+type NavBarProps = {
+  showFilters: boolean;
+  setShowFilters: Dispatch<SetStateAction<boolean>>;
+  children: React.ReactElement<typeof NavBarSearchInput>;
+} & Omit<ReturnType<typeof useWeaponSearch>, "filteredWeapons" | "input">;
+export function NavBar({
+  parameters,
+  setSortBy,
+  updateFilterFunctions,
+  setInput,
+  children,
+}: NavBarProps) {
+  const [showFilters, setShowFilters] = useState(false);
+  return (
+    <div className="position sticky bottom-0">
+      {showFilters && (
+        <WeaponFilterToggleMenu
+          parameters={parameters}
+          setSortBy={setSortBy}
+          show={showFilters}
+          updateFilterFunctions={updateFilterFunctions}
+        />
+      )}
+      <div>
+        <BackToTop />
+        <nav>
+          <NavBarTextLogo />
+          {children}
+          <div>
+            <NavBarButton onClick={() => setInput("")}>
+              <IconCircleX size={24} color={"white"} />
+            </NavBarButton>
+          </div>
+        </nav>
+      </div>
+    </div>
+  );
+}
+
+type WeaponFilterToggleMenuProps = {
+  updateFilterFunctions: ReturnType<
+    typeof useWeaponSearch
+  >["updateFilterFunctions"];
+  show: boolean;
+  setSortBy: ReturnType<typeof useWeaponSearch>["setSortBy"];
+  parameters: ReturnType<typeof useWeaponSearch>["parameters"];
+};
+
+export function WeaponFilterToggleMenu<T extends keyof WeaponLite>({
+  updateFilterFunctions,
+  show,
+  parameters,
+  setSortBy,
+}: WeaponFilterToggleMenuProps) {
+  return (
+    <div
+      className={`${
+        show ? "flex" : "hidden"
+      } m-2 shrink grow flex-col overflow-y-scroll sm:top-8 sm:max-h-[90vh] sm:basis-0 sm:overflow-auto`}
+    >
+      <ToggleGroup
+        title={"Ammo Type"}
+        propertyHashes={ammoTypes}
+        updateFilterFunctions={updateFilterFunctions}
+      />
+      <ToggleGroup
+        title="Element"
+        propertyHashes={defaultDamageTypes}
+        updateFilterFunctions={updateFilterFunctions}
+      />
+      <ToggleGroup
+        title="Slot"
+        propertyHashes={equipmentSlotTypes}
+        updateFilterFunctions={updateFilterFunctions}
+      />
+      <ToggleGroup
+        title="Weapon Type"
+        propertyHashes={archeTypes}
+        updateFilterFunctions={updateFilterFunctions}
+      />
+      {parameters.has("itemCategory") && parameters.size > 0 && (
+        <ToggleStatGroup
+          updateFilterFunctions={updateFilterFunctions}
+          parameters={parameters}
+          setSortBy={setSortBy}
+        />
+      )}
+    </div>
+  );
+}

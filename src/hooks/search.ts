@@ -1,4 +1,10 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  MutableRefObject,
+} from "react";
 import { WeaponLite } from "../types/weaponTypes.js";
 
 export type FlattenArray<T> = T extends (infer U)[] ? U : T;
@@ -11,27 +17,27 @@ export type FilterImplementation<T extends keyof WeaponLite> = (
   property: WeaponLite[T]
 ) => boolean;
 
-export type State = {
-  input: string;
-  filterFunctions: Map<keyof WeaponLite, FilterFunction>;
-};
-
-export function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
-  func: F,
-  delay: number
-): (...args: Parameters<F>) => void {
-  let timer: NodeJS.Timeout;
-  return (...args: Parameters<F>): void => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func(...args), delay);
-  };
+function useInput(inputElement: MutableRefObject<HTMLInputElement | null>) {
+  const [input, setInputState] = useState(
+    inputElement && inputElement.current ? inputElement.current.value : ""
+  );
+  function setInput(newInput: string) {
+    setInputState(newInput);
+    if (inputElement && inputElement.current) {
+      inputElement.current.value = newInput;
+    }
+  }
+  return [input, setInput] as const;
 }
 
 export function useWeaponSearch(
   weapons: WeaponLite[] | undefined,
+  inputElement: MutableRefObject<HTMLInputElement | null>,
   initial?: "empty"
 ) {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useInput(inputElement);
+  console.log(input);
+
   const filterFunctinsRef = useRef(new Map<keyof WeaponLite, FilterFunction>());
   const [sortBy, setSortBy] = useState<{
     hash: number | null;
