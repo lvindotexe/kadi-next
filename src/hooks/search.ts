@@ -4,6 +4,8 @@ import {
   useCallback,
   useMemo,
   MutableRefObject,
+  Dispatch,
+  SetStateAction,
 } from "react";
 import { WeaponLite } from "../types/weaponTypes.js";
 
@@ -30,14 +32,52 @@ function useInput(inputElement: MutableRefObject<HTMLInputElement | null>) {
   return [input, setInput] as const;
 }
 
+type FilterableWeaponProps = Pick<
+  WeaponLite,
+  | "ammoType"
+  | "defaultDamageType"
+  | "equipmentSlotTypeHash"
+  | "investmentStats"
+  | "perks"
+>;
+
+type useWeaponSearchReturn = {
+  input: string;
+  setInput: (input: string) => void;
+  sortOrder: {
+    hash: number;
+    order: "asc" | "dsc";
+  };
+  setSortOrder: Dispatch<
+    SetStateAction<{
+      hash: number | null;
+      order: "asc" | "dsc";
+    }>
+  >;
+  subscribe: unknown;
+};
+
+export function useWeaponSearchNeo(
+  weapons: WeaponLite[] | undefined,
+  inputElement: MutableRefObject<HTMLInputElement | null>,
+  initial?: "empty"
+): useWeaponSearchReturn {
+  const [input, setInput] = useInput(inputElement);
+  const [sortOrder, setSortOrder] = useState<{
+    hash: number | null;
+    order: "asc" | "dsc";
+  }>({
+    hash: null,
+    order: "asc",
+  });
+}
+
 export function useWeaponSearch(
   weapons: WeaponLite[] | undefined,
   inputElement: MutableRefObject<HTMLInputElement | null>,
   initial?: "empty"
 ) {
   const [input, setInput] = useInput(inputElement);
-  console.log(input);
-
   const filterFunctinsRef = useRef(new Map<keyof WeaponLite, FilterFunction>());
   const [sortBy, setSortBy] = useState<{
     hash: number | null;
