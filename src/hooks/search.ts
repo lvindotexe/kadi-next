@@ -1,12 +1,13 @@
 import {
-  useState,
-  useRef,
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
   useCallback,
   useMemo,
-  MutableRefObject,
-  Dispatch,
-  SetStateAction,
+  useRef,
+  useState,
 } from "react";
+import { debounce } from "../lib/utils.js";
 import { WeaponLite } from "../types/weaponTypes.js";
 
 export type FlattenArray<T> = T extends (infer U)[] ? U : T;
@@ -61,7 +62,7 @@ export function useWeaponSearchNeo(
   weapons: WeaponLite[] | undefined,
   inputElement: MutableRefObject<HTMLInputElement | null>,
   initial?: "empty"
-): useWeaponSearchReturn {
+) {
   const [input, setInput] = useInput(inputElement);
   const [sortOrder, setSortOrder] = useState<{
     hash: number | null;

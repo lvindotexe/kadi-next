@@ -1,15 +1,14 @@
-import { type NextPage } from "next";
 import { get } from "idb-keyval";
+import { type NextPage } from "next";
 import Head from "next/head";
 
 import { useQuery } from "@tanstack/react-query";
-import { getDestinyManifest } from "bungie-api-ts/destiny2";
+import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { NavBar, NavBarSearchInput } from "../components/Navbar";
 import { useWeaponSearch } from "../hooks/search";
-import { fetchAndCache, generateHttpClient } from "../lib/utils";
+import { debounce, fetchAndCache } from "../lib/utils";
 import { WeaponLite } from "../types/weaponTypes";
-import Link from "next/link";
 
 export function initialiseHomePage() {
   //@ts-ignore fix me
@@ -58,9 +57,10 @@ export function ItemIcon({ item }: { item: ItemIconProps }) {
 function WeaponGrid({ weapons }: { weapons: WeaponLite[] }) {
   return (
     <>
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(4rem,max-content))] justify-around gap-2">
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(4rem,auto))] gap-2">
+        {/* <ul className="m-auto flex w-fit flex-wrap items-center gap-2"> */}
         {weapons.map((w) => (
-          <li key={w.hash}>
+          <li key={w.hash} className="m-auto">
             <Link href={`/w/${w.hash}`}>
               <ItemIcon key={w.hash} item={w} />
             </Link>
@@ -79,19 +79,26 @@ function HomePage({ data }: { data: WeaponLite[] }) {
     parameters,
     updateFilterFunctions,
     setSortBy,
+    input,
   } = useWeaponSearch(data, inputRef);
   const [showFilters, setShowFilters] = useState(false);
+  const debouncedInput = useMemo(() => debounce(setInput, 100), []);
   return (
     <>
       <NavBar
         setInput={setInput}
+        input={input}
         showFilters={true}
         setShowFilters={setShowFilters}
         parameters={parameters}
         setSortBy={setSortBy}
         updateFilterFunctions={updateFilterFunctions}
       >
-        <NavBarSearchInput ref={inputRef} setInput={setInput} />
+        <NavBarSearchInput
+          ref={inputRef}
+          setInput={debouncedInput}
+          className="bg-gray-900 p-2 text-3xl text-white outline-none"
+        />
       </NavBar>
       {filteredWeapons && <WeaponGrid weapons={filteredWeapons} />}
     </>
@@ -99,10 +106,6 @@ function HomePage({ data }: { data: WeaponLite[] }) {
 }
 
 const Home: NextPage = () => {
-  const httpClient = useMemo(
-    () => generateHttpClient(fetch, process.env.NEXT_PUBLIC_KEY!),
-    []
-  );
   const { status, data } = useQuery(["manifestversion"], () =>
     get("WeaponsLite").then((result) => {
       if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
@@ -119,9 +122,9 @@ const Home: NextPage = () => {
         <title>Kadi-One</title>
         <meta name="description" content="A destiny 2 companion app" />
       </Head>
-      <main className="grid items-center bg-black">
+      <main className="grid min-h-screen items-center bg-black">
         {status === "loading" ? (
-          <div>loading</div>
+          <div className="text-white">loading</div>
         ) : status === "success" ? (
           <HomePage data={data} />
         ) : (

@@ -1,12 +1,13 @@
+import { IconArrowUp, IconCircleX } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   DestinyStatDefinition,
   DestinyStatGroupDefinition,
 } from "bungie-api-ts/destiny2";
 import React, {
-  Children,
   Dispatch,
   forwardRef,
+  HTMLProps,
   MutableRefObject,
   SetStateAction,
   useCallback,
@@ -25,7 +26,6 @@ import {
   WeaponLitePropertyHash,
 } from "../types/types";
 import { WeaponLite } from "../types/weaponTypes";
-import { IconArrowUp, IconCircleX } from "@tabler/icons-react";
 
 type ToggleGroupProps<T extends keyof WeaponLite> = {
   title: string;
@@ -350,7 +350,7 @@ const SortByOption: React.FC<SortByProps> = ({
 };
 
 export function NavBarTextLogo() {
-  return <p className="text-center text-2xl font-bold">Kadi-One</p>;
+  return;
 }
 
 export const NavBarSearchInput = forwardRef<
@@ -363,14 +363,13 @@ export const NavBarSearchInput = forwardRef<
     "type" | "onChange"
   > & { setInput: (input: string) => void }
 >(({ setInput, ...rest }, ref) => {
-  const debouncedInput = debounce(setInput, 100);
   return (
     <input
       ref={ref}
       type="text"
       {...rest}
       onChange={(e) => {
-        debouncedInput(e.target.value.toLowerCase());
+        setInput(e.target.value.toLowerCase());
       }}
     />
   );
@@ -378,61 +377,60 @@ export const NavBarSearchInput = forwardRef<
 
 export function NavBarButton({
   children,
-  onClick,
+  ...props
 }: {
   children: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button onClick={onClick} className="items-center text-black">
-      {children}
-    </button>
-  );
-}
-
-export function BackToTop() {
-  return (
-    <button
-      onClick={() => (document.body.scrollTop = 0)}
-      className="padding-2 bg-black"
-    >
-      <IconArrowUp size={24} color="white" />
-    </button>
-  );
+} & React.DetailedHTMLProps<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLButtonElement
+>) {
+  return <button {...props}>{children}</button>;
 }
 
 type NavBarProps = {
   showFilters: boolean;
   setShowFilters: Dispatch<SetStateAction<boolean>>;
   children: React.ReactElement<typeof NavBarSearchInput>;
-} & Omit<ReturnType<typeof useWeaponSearch>, "filteredWeapons" | "input">;
+} & Omit<ReturnType<typeof useWeaponSearch>, "filteredWeapons">;
 export function NavBar({
   parameters,
   setSortBy,
   updateFilterFunctions,
   setInput,
   children,
+  input,
 }: NavBarProps) {
   const [showFilters, setShowFilters] = useState(false);
   return (
-    <div className="position sticky bottom-0">
-      {showFilters && (
-        <WeaponFilterToggleMenu
-          parameters={parameters}
-          setSortBy={setSortBy}
-          show={showFilters}
-          updateFilterFunctions={updateFilterFunctions}
-        />
-      )}
-      <div>
-        <BackToTop />
-        <nav>
-          <NavBarTextLogo />
+    <div className="fixed bottom-1 w-full">
+      <div className="flex bg-transparent p-10">
+        <NavBarButton
+          className="rounded-md bg-black p-2 text-center"
+          onClick={() => {
+            window.scrollTo(0, 9);
+          }}
+        >
+          <IconArrowUp size={48} color="white" />
+        </NavBarButton>
+        <nav className="m-auto flex bg-gray-700">
+          {showFilters && (
+            <WeaponFilterToggleMenu
+              parameters={parameters}
+              setSortBy={setSortBy}
+              show={showFilters}
+              updateFilterFunctions={updateFilterFunctions}
+            />
+          )}
+          <p className="m-auto grid items-center p-2 text-center text-2xl font-bold text-white">
+            Kadi-One
+          </p>
           {children}
           <div>
-            <NavBarButton onClick={() => setInput("")}>
-              <IconCircleX size={24} color={"white"} />
-            </NavBarButton>
+            {input.length > 0 && (
+              <NavBarButton onClick={() => setInput("")}>
+                <IconCircleX size={48} color={"white"} />
+              </NavBarButton>
+            )}
           </div>
         </nav>
       </div>
