@@ -96,9 +96,6 @@ export function useWeaponSearch(
         props: ArrayOfPrimitivesOrObject<FlattenArray<WeaponLite[T]>>
       ) => {
         const filterFn = (weapon: WeaponLite) => {
-          if (Object.keys(weapon[filterType]).length === 0) {
-            console.log(weapon);
-          }
           return filterImplementation(props, weapon[filterType]);
         };
         if (props instanceof Array) {
