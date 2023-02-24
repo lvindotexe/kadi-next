@@ -406,14 +406,6 @@ export function NavBar({
   return (
     <div className="fixed bottom-1 w-full">
       <div className="flex bg-transparent p-10">
-        <NavBarButton
-          className={`flex items-center rounded-md bg-gray-900 p-3`}
-          onClick={() => {
-            window.scrollTo(0, 9);
-          }}
-        >
-          <IconArrowUp size={36} color="white" />
-        </NavBarButton>
         <nav className="m-auto flex rounded-md bg-gray-500 bg-opacity-70">
           {showFilters && (
             <WeaponFilterToggleMenu

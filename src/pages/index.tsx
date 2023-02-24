@@ -61,58 +61,17 @@ export function ItemIcon({ item }: { item: ItemIconProps }) {
   );
 }
 
-function easeInOutQuint(t: any) {
-  return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t;
-}
-
 function WeaponGrid({ weapons }: { weapons: WeaponLite[] }) {
-  const ulRef = useRef<HTMLUListElement>(null);
-  const scrollRef = useRef<number>();
-
-  const scrollToFn: VirtualizerOptions<any, any>["scrollToFn"] = useMemo(
-    () => (offset, canSmooth, instance) => {
-      const duration = 1000;
-      const start = ulRef.current?.scrollTop!;
-      const startTime = (scrollRef.current = Date.now());
-
-      function run() {
-        if (scrollRef.current !== startTime) return;
-        const now = Date.now();
-        const elapsed = now - startTime;
-        const progress = easeInOutQuint(Math.min(elapsed / duration, 1));
-        const interpolated = start + (offset - start) * progress;
-
-        if (elapsed < duration) {
-          elementScroll(interpolated, canSmooth, instance);
-          requestAnimationFrame(run);
-        } else elementScroll(interpolated, canSmooth, instance);
-      }
-      requestAnimationFrame(run);
-    },
-    []
-  );
-
-  const virtualiser = useVirtualizer({
-    count: weapons.length,
-    getScrollElement: () => ulRef.current,
-    estimateSize: () => 100,
-    overscan: 10,
-    scrollToFn,
-  });
   return (
     <>
-      <ul ref={ulRef} className="flex flex-wrap justify-center gap-2">
-        {virtualiser.getVirtualItems().map((e) => {
-          const weapon = weapons[e.index];
-          if (!weapon) return null;
-          return (
-            <li key={weapon.hash}>
-              <Link href={`/w/${weapon.hash}`}>
-                <ItemIcon key={weapon.hash} item={weapon} />
-              </Link>
-            </li>
-          );
-        })}
+      <ul className="flex flex-wrap justify-center gap-2">
+        {weapons.map((e) => (
+          <li key={e.hash}>
+            <Link href={`/w/${e.hash}`}>
+              <ItemIcon key={e.hash} item={e} />
+            </Link>
+          </li>
+        ))}
       </ul>
     </>
   );
@@ -127,7 +86,7 @@ function HomePage({ data }: { data: WeaponLite[] }) {
     updateFilterFunctions,
     setSortBy,
     input,
-  } = useWeaponSearch(data, inputRef);
+  } = useWeaponSearch(data, inputRef, "empty");
   const [showFilters, setShowFilters] = useState(false);
   const debouncedInput = useMemo(() => debounce(setInput, 100), []);
 

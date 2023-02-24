@@ -137,7 +137,7 @@ export function useWeaponSearch(
     const hasEntries = [...filterFunctinsRef.current.entries()].some(
       ([_k, fns]) => fns.length > 0
     );
-    if (!hasEntries && typeof initial === "string" && input.length <= 3)
+    if (!hasEntries && typeof initial === "string" && input.length < 3)
       return [];
     const filterImplementations = [
       ...filterFunctinsRef.current.entries(),
