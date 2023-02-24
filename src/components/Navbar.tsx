@@ -1,4 +1,4 @@
-import { IconArrowUp, IconCircleX } from "@tabler/icons-react";
+import { IconArrowUp, IconCircleX, IconSearch } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   DestinyStatDefinition,
@@ -88,7 +88,7 @@ export function ToggleItem<
   >
 >({ name, hash, selectedItemsRef, setter }: ToggleItemProps<T>) {
   const [selected, setSelected] = useState(false);
-  const debouncedSetter = useCallback(debounce(setter, 200), []);
+  const debouncedSetter = useMemo(() => debounce(setter, 200), []);
   const handleClick = () => {
     setSelected(!selected);
     selectedItemsRef.current = !selected
@@ -401,18 +401,20 @@ export function NavBar({
   input,
 }: NavBarProps) {
   const [showFilters, setShowFilters] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(window.scrollY);
+
   return (
     <div className="fixed bottom-1 w-full">
       <div className="flex bg-transparent p-10">
         <NavBarButton
-          className="rounded-md bg-black p-2 text-center"
+          className={`flex items-center rounded-md bg-gray-900 p-3`}
           onClick={() => {
             window.scrollTo(0, 9);
           }}
         >
-          <IconArrowUp size={48} color="white" />
+          <IconArrowUp size={36} color="white" />
         </NavBarButton>
-        <nav className="m-auto flex bg-gray-700">
+        <nav className="m-auto flex rounded-md bg-gray-500 bg-opacity-70">
           {showFilters && (
             <WeaponFilterToggleMenu
               parameters={parameters}
@@ -421,16 +423,20 @@ export function NavBar({
               updateFilterFunctions={updateFilterFunctions}
             />
           )}
-          <p className="m-auto grid items-center p-2 text-center text-2xl font-bold text-white">
+          <p className=" m-1 grid items-center rounded-md bg-gray-700 p-3 text-center text-2xl font-bold text-white">
             Kadi-One
           </p>
-          {children}
-          <div>
-            {input.length > 0 && (
-              <NavBarButton onClick={() => setInput("")}>
-                <IconCircleX size={48} color={"white"} />
+          <div className="m-1 flex gap-2 rounded-md bg-gray-900 px-2">
+            {children}
+            <div className="gap flex items-center">
+              <NavBarButton>
+                {input.length > 0 ? (
+                  <IconCircleX size={36} color={"white"} />
+                ) : (
+                  <IconSearch size={36} color={"white"} />
+                )}
               </NavBarButton>
-            )}
+            </div>
           </div>
         </nav>
       </div>
