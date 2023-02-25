@@ -1,4 +1,10 @@
-import { IconArrowUp, IconCircleX, IconSearch } from "@tabler/icons-react";
+import {
+  IconArrowUp,
+  IconCircleX,
+  IconMenu2,
+  IconSearch,
+  IconX,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   DestinyStatDefinition,
@@ -16,6 +22,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useClickOutside } from "../hooks/hooks";
 import { useWeaponSearch } from "../hooks/search";
 import { debounce, getManifestTables } from "../lib/utils";
 import {
@@ -48,9 +55,7 @@ export function ToggleGroup<
   const selectedItemsRef = useRef(new Array<WeaponLite[T]>());
   return (
     <div>
-      <p className="border-b-[1px] border-b-gray-400 py-2 text-2xl font-bold text-gray-400">
-        {title}
-      </p>
+      <p className=" text-xl font-bold text-gray-300">{title}</p>
       <ul className="flex shrink grow flex-wrap gap-2 py-4">
         {Object.entries(propertyHashes.proertyHashes).map(([k, v], index) => (
           <ToggleItem
@@ -101,9 +106,9 @@ export function ToggleItem<
   return (
     <button
       className={`${
-        selected ? "bg-white" : "border-[1px] bg-black"
+        selected ? "bg-gray-300" : "border-[1px] bg-gray-900"
       } rounded-full px-4 py-[0.1rem] text-[1.1rem] ${
-        selected ? "text-black" : "text-white"
+        selected ? "text-gray-900" : "text-gray-300"
       }`}
       onClick={handleClick}
     >
@@ -133,9 +138,9 @@ export function ToggleStatItem({
         (statsToFilter.current.has(stat.hash) &&
           statsToFilter.current.get(stat.hash)! > 0) ||
         showFilter
-          ? "bg-white text-black"
+          ? "bg-gray-300 text-gray-900"
           : null
-      } flex grow-0 basis-[max-content] gap-1 whitespace-nowrap rounded-full border-[1px] px-4 py-[0.1rem]`}
+      } flex grow-0 basis-[max-content] gap-1 whitespace-nowrap rounded-full border-[1px] border-gray-300 px-4 py-[0.1rem] text-gray-300`}
       onClick={() => setShowFilter(!showFilter)}
     >
       <p>
@@ -234,15 +239,8 @@ export function ToggleStatGroup({
 
   return (
     <div>
-      <p className="border-b-[1px] py-2 text-2xl font-bold text-gray-400">
-        Stats
-      </p>
+      <p className="py-2 text-xl font-bold text-gray-300">Stats</p>
       <ul className="flex shrink grow flex-wrap gap-2 py-4">
-        <SortByOption
-          parameters={parameters}
-          statDefinitions={filteredDefinitions}
-          setSortBy={setSortBy}
-        />
         {filteredDefinitions.map((e) => (
           <ToggleStatItem
             key={e.hash}
@@ -401,12 +399,17 @@ export function NavBar({
   input,
 }: NavBarProps) {
   const [showFilters, setShowFilters] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(window.scrollY);
+  const navRef = useRef<HTMLElement | null>(null);
+  useClickOutside(navRef, () => setShowFilters(false));
 
   return (
     <div className="fixed bottom-1 w-full">
       <div className="flex bg-transparent p-10">
-        <nav className="m-auto flex rounded-md bg-gray-500 bg-opacity-70">
+        <nav
+          ref={navRef}
+          onMouseLeave={() => setShowFilters(false)}
+          className="m-auto rounded-md bg-gray-500 bg-opacity-70"
+        >
           {showFilters && (
             <WeaponFilterToggleMenu
               parameters={parameters}
@@ -415,19 +418,36 @@ export function NavBar({
               updateFilterFunctions={updateFilterFunctions}
             />
           )}
-          <p className=" m-1 grid items-center rounded-md bg-gray-700 p-3 text-center text-2xl font-bold text-white">
-            Kadi-One
-          </p>
-          <div className="m-1 flex gap-2 rounded-md bg-gray-900 px-2">
-            {children}
-            <div className="gap flex items-center">
-              <NavBarButton>
-                {input.length > 0 ? (
-                  <IconCircleX size={36} color={"white"} />
+          <div className="m-2 flex gap-2 ">
+            <div className="flex items-center gap-2 rounded-md bg-gray-700 p-2 text-center text-2xl text-white">
+              <span className="flex">
+                <p className="font-bold">Kadi</p>&nbsp;
+                <p>One</p>
+              </span>
+
+              <NavBarButton onClick={() => setShowFilters((prev) => !prev)}>
+                {showFilters ? (
+                  <IconX size={36} color="white" />
                 ) : (
-                  <IconSearch size={36} color={"white"} />
+                  <IconMenu2 size={36} color="white" />
                 )}
               </NavBarButton>
+            </div>
+            <div className=" flex gap-2 rounded-md bg-gray-900 px-2">
+              {children}
+              <div className="gap flex items-center">
+                <NavBarButton>
+                  {input.length > 0 ? (
+                    <IconCircleX
+                      size={36}
+                      color={"white"}
+                      onClick={() => setInput("")}
+                    />
+                  ) : (
+                    <IconSearch size={36} color={"white"} />
+                  )}
+                </NavBarButton>
+              </div>
             </div>
           </div>
         </nav>
@@ -455,7 +475,7 @@ export function WeaponFilterToggleMenu<T extends keyof WeaponLite>({
     <div
       className={`${
         show ? "flex" : "hidden"
-      } m-2 shrink grow flex-col overflow-y-scroll sm:top-8 sm:max-h-[90vh] sm:basis-0 sm:overflow-auto`}
+      } m-2 shrink grow flex-col overflow-y-scroll rounded-md bg-gray-900 p-2 sm:top-8 sm:max-h-[90vh] sm:basis-0 sm:overflow-auto`}
     >
       <ToggleGroup
         title={"Ammo Type"}
