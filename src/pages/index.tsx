@@ -105,12 +105,13 @@ function HomePage({ data }: { data: WeaponLite[] }) {
         setShowFilters={setShowFilters}
         parameters={parameters}
         setSortBy={setSortBy}
+        resultsLength={69}
         updateFilterFunctions={updateFilterFunctions}
       >
         <NavBarSearchInput
           ref={inputRef}
           setInput={debouncedInput}
-          className="rounded-md bg-gray-900 px-2 text-3xl text-white outline-none"
+          className="grow rounded-md bg-gray-900 px-2 text-3xl text-white outline-none"
         />
       </NavBar>
       {filteredWeapons && <WeaponGrid weapons={filteredWeapons} />}

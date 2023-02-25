@@ -388,6 +388,7 @@ export function NavBarButton({
 type NavBarProps = {
   showFilters: boolean;
   setShowFilters: Dispatch<SetStateAction<boolean>>;
+  resultsLength: number;
   children: React.ReactElement<typeof NavBarSearchInput>;
 } & Omit<ReturnType<typeof useWeaponSearch>, "filteredWeapons">;
 export function NavBar({
@@ -397,6 +398,7 @@ export function NavBar({
   setInput,
   children,
   input,
+  resultsLength,
 }: NavBarProps) {
   const [showFilters, setShowFilters] = useState(false);
   const navRef = useRef<HTMLElement | null>(null);
@@ -410,21 +412,17 @@ export function NavBar({
           onMouseLeave={() => setShowFilters(false)}
           className="m-auto rounded-md bg-gray-500 bg-opacity-70"
         >
-          {showFilters && (
-            <WeaponFilterToggleMenu
-              parameters={parameters}
-              setSortBy={setSortBy}
-              show={showFilters}
-              updateFilterFunctions={updateFilterFunctions}
-            />
-          )}
+          <WeaponFilterToggleMenu
+            resultsLength={resultsLength}
+            show={showFilters}
+            updateFilterFunctions={updateFilterFunctions}
+          />
           <div className="m-2 flex gap-2 ">
             <div className="flex items-center gap-2 rounded-md bg-gray-700 p-2 text-center text-2xl text-white">
               <span className="flex">
                 <p className="font-bold">Kadi</p>&nbsp;
                 <p>One</p>
               </span>
-
               <NavBarButton onClick={() => setShowFilters((prev) => !prev)}>
                 {showFilters ? (
                   <IconX size={36} color="white" />
@@ -433,10 +431,10 @@ export function NavBar({
                 )}
               </NavBarButton>
             </div>
-            <div className=" flex gap-2 rounded-md bg-gray-900 px-2">
+            <div className=" flex grow gap-2 rounded-md bg-gray-900 px-2">
               {children}
               <div className="gap flex items-center">
-                <NavBarButton>
+                <NavBarButton className="grow-0">
                   {input.length > 0 ? (
                     <IconCircleX
                       size={36}
@@ -461,15 +459,13 @@ type WeaponFilterToggleMenuProps = {
     typeof useWeaponSearch
   >["updateFilterFunctions"];
   show: boolean;
-  setSortBy: ReturnType<typeof useWeaponSearch>["setSortBy"];
-  parameters: ReturnType<typeof useWeaponSearch>["parameters"];
+  resultsLength: number;
 };
 
 export function WeaponFilterToggleMenu<T extends keyof WeaponLite>({
   updateFilterFunctions,
   show,
-  parameters,
-  setSortBy,
+  resultsLength,
 }: WeaponFilterToggleMenuProps) {
   return (
     <div
@@ -497,12 +493,18 @@ export function WeaponFilterToggleMenu<T extends keyof WeaponLite>({
         propertyHashes={archeTypes}
         updateFilterFunctions={updateFilterFunctions}
       />
-      {parameters.has("itemCategory") && parameters.size > 0 && (
+      {/* {parameters.has("itemCategory") && parameters.size > 0 && (
         <ToggleStatGroup
           updateFilterFunctions={updateFilterFunctions}
           parameters={parameters}
           setSortBy={setSortBy}
         />
+      )} */}
+      {resultsLength > 0 && (
+        <span className="flex text-xl text-white">
+          <p className="font-bold">{resultsLength}</p>&nbsp;
+          <p>weapons found</p>
+        </span>
       )}
     </div>
   );
