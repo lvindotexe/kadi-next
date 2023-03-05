@@ -1,21 +1,18 @@
 import { get } from "idb-keyval";
 import { type NextPage } from "next";
 import Head from "next/head";
-
 import { useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { NavBar, NavBarSearchInput } from "../components/Navbar";
-import { useWeaponSearch } from "../hooks/search";
-import { debounce, fetchAndCache } from "../lib/utils";
-import { WeaponLite } from "../types/weaponTypes";
+import { useEffect, useRef } from "react";
+import { NavBar } from "../components/Navbar";
 import {
-  elementScroll,
-  useVirtualizer,
-  VirtualizerOptions,
-} from "@tanstack/react-virtual";
-import { IconEaseInOut } from "@tabler/icons-react";
-import { each } from "immer/dist/internal";
+  categorisedWeaponsAtom,
+  filteredWeaponsAtom,
+  searchInputAtom,
+} from "../hooks/search";
+import { fetchAndCache } from "../lib/utils";
+import { WeaponLite } from "../types/weaponTypes";
 
 export function initialiseHomePage() {
   //@ts-ignore fix me
@@ -61,35 +58,52 @@ export function ItemIcon({ item }: { item: ItemIconProps }) {
   );
 }
 
-function WeaponGrid({ weapons }: { weapons: WeaponLite[] }) {
+function WeaponGrid() {
+  const [categorisedWeapons] = useAtom(categorisedWeaponsAtom);
+  const [filteredWeapons] = useAtom(filteredWeaponsAtom);
+  const [input] = useAtom(searchInputAtom);
+  const hasCategorisedWeapons =
+    categorisedWeapons.size > 0 &&
+    [...categorisedWeapons.values()].every(
+      (weaponCategory) => weaponCategory.length > 0
+    );
+
+  console.log(hasCategorisedWeapons, categorisedWeapons);
+
+  function mapWeapons(weapons: WeaponLite[]) {
+    return weapons.map((e) => (
+      <li key={e.hash}>
+        <Link href={`/w/${e.hash}`}>
+          <ItemIcon key={e.hash} item={e} />
+        </Link>
+      </li>
+    ));
+  }
+
   return (
     <>
-      <ul className="flex flex-wrap justify-center gap-2">
-        {weapons.map((e) => (
-          <li key={e.hash}>
-            <Link href={`/w/${e.hash}`}>
-              <ItemIcon key={e.hash} item={e} />
-            </Link>
-          </li>
-        ))}
+      <ul
+        className={`${
+          hasCategorisedWeapons
+            ? "grid auto-rows-min gap-2"
+            : "flex flex-wrap justify-center gap-2"
+        }`}
+      >
+        {hasCategorisedWeapons
+          ? [...categorisedWeapons.entries()].map(([key, values]) => (
+              <div key={key}>
+                <h1 className="text-3xl font-bold text-white">{key}</h1>
+                <ul className="flex flex-wrap gap-2">{mapWeapons(values)}</ul>
+              </div>
+            ))
+          : mapWeapons(filteredWeapons)}
       </ul>
     </>
   );
 }
 
-function HomePage({ data }: { data: WeaponLite[] }) {
+function HomePage() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const {
-    setInput,
-    filteredWeapons,
-    parameters,
-    updateFilterFunctions,
-    setSortBy,
-    input,
-  } = useWeaponSearch(data, inputRef, "empty");
-  const [showFilters, setShowFilters] = useState(false);
-  const debouncedInput = useMemo(() => debounce(setInput, 100), []);
-
   useEffect(() => {
     if (inputRef && inputRef.current) {
       inputRef.current.focus();
@@ -98,23 +112,8 @@ function HomePage({ data }: { data: WeaponLite[] }) {
 
   return (
     <>
-      <NavBar
-        setInput={setInput}
-        input={input}
-        showFilters={true}
-        setShowFilters={setShowFilters}
-        parameters={parameters}
-        setSortBy={setSortBy}
-        resultsLength={69}
-        updateFilterFunctions={updateFilterFunctions}
-      >
-        <NavBarSearchInput
-          ref={inputRef}
-          setInput={debouncedInput}
-          className="grow rounded-md bg-gray-900 px-2 text-3xl text-white outline-none"
-        />
-      </NavBar>
-      {filteredWeapons && <WeaponGrid weapons={filteredWeapons} />}
+      <NavBar />
+      <WeaponGrid />
     </>
   );
 }
@@ -136,11 +135,12 @@ const Home: NextPage = () => {
         <title>Kadi-One</title>
         <meta name="description" content="A destiny 2 companion app" />
       </Head>
+
       <main className="grid min-h-screen items-center bg-black">
         {status === "loading" ? (
           <div className="text-white">loading</div>
         ) : status === "success" ? (
-          <HomePage data={data} />
+          <HomePage />
         ) : (
           <div>oops</div>
         )}

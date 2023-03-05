@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@next/env': ^13.1.6
   '@tabler/icons-react': ^2.4.0
+  '@tanstack/query-core': ^4.24.10
   '@tanstack/react-query': ^4.24.6
   '@tanstack/react-virtual': 3.0.0-beta.49
   '@trpc/client': ^10.12.0
@@ -20,6 +21,8 @@ specifiers:
   http-status-codes: ^2.2.0
   idb-keyval: ^6.2.0
   immer: ^9.0.19
+  jotai: ^2.0.3
+  jotai-tanstack-query: ^0.6.0
   next: 13.1.6
   postcss: ^8.4.14
   prettier: ^2.8.1
@@ -37,6 +40,7 @@ specifiers:
 dependencies:
   '@next/env': 13.1.6
   '@tabler/icons-react': 2.4.0_react@18.2.0
+  '@tanstack/query-core': 4.24.10
   '@tanstack/react-query': 4.24.6_biqbaboplfbrettd7655fr4n2y
   '@tanstack/react-virtual': 3.0.0-beta.49_react@18.2.0
   '@trpc/client': 10.12.0_@trpc+server@10.12.0
@@ -47,6 +51,8 @@ dependencies:
   http-status-codes: 2.2.0
   idb-keyval: 6.2.0
   immer: 9.0.19
+  jotai: 2.0.3_react@18.2.0
+  jotai-tanstack-query: 0.6.0_65iyg2c4xbfcxjgnk73xrlbbhq
   next: 13.1.6_pjwopsidmaokadturxaafygjp4
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -1912,6 +1918,10 @@ packages:
 
   /@tabler/icons/2.4.0:
     resolution: {integrity: sha512-JZY9Kk3UsQoqp7Rw/BuWw1PrkRwv5h0psjJBbj+Cn9UVyhdzr5vztg2mywXBAJ+jFBUL/pjnVcIvOzKFw4CXng==}
+    dev: false
+
+  /@tanstack/query-core/4.24.10:
+    resolution: {integrity: sha512-2QywqXEAGBIUoTdgn1lAB4/C8QEqwXHj2jrCLeYTk2xVGtLiPEUD8jcMoeB2noclbiW2mMt4+Fq7fZStuz3wAQ==}
     dev: false
 
   /@tanstack/query-core/4.24.6:
@@ -5061,6 +5071,28 @@ packages:
 
   /javascript-stringify/2.1.0:
     resolution: {integrity: sha512-JVAfqNPTvNq3sB/VHQJAFxN/sPgKnsKrCwyRt15zwNCdrMMJDdcEOdubuy+DuJYYdm0ox1J4uzEuYKkN+9yhVg==}
+    dev: false
+
+  /jotai-tanstack-query/0.6.0_65iyg2c4xbfcxjgnk73xrlbbhq:
+    resolution: {integrity: sha512-87oD6MnjrgfLWeCJXB/dQt4xyCmyFYZeG9jw4Y2lIprtwLKS5s/vCEjNP5fnYG2nuPBkopiRECTEqtIysvHSxg==}
+    peerDependencies:
+      '@tanstack/query-core': '*'
+      jotai: '>=1.11.0'
+    dependencies:
+      '@tanstack/query-core': 4.24.10
+      jotai: 2.0.3_react@18.2.0
+    dev: false
+
+  /jotai/2.0.3_react@18.2.0:
+    resolution: {integrity: sha512-MMjhSPAL3RoeZD9WbObufRT2quThEAEknHHridf2ma8Ml7ZVQmUiHk0ssdbR3F0h3kcwhYqSGJ59OjhPge7RRg==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /js-sdsl/4.3.0:

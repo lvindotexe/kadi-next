@@ -5,7 +5,6 @@ import {
 import { HttpClientConfig } from "bungie-api-ts/http";
 import exp from "constants";
 import { set } from "idb-keyval";
-import { Url } from "url";
 import { DatabaseTables } from "../types/types.js";
 
 export function isNotNullOrUndefined<T extends object>(
@@ -18,6 +17,7 @@ export function isAdept(name: string) {
     name.toLowerCase().includes(e)
   );
 }
+
 export function debounce<F extends (...args: Parameters<F>) => ReturnType<F>>(
   func: F,
   delay: number
