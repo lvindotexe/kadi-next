@@ -2,7 +2,7 @@ import { get as idbGet } from "idb-keyval";
 import { atom } from "jotai";
 import { atomsWithQuery } from "jotai-tanstack-query";
 import { MutableRefObject, useState } from "react";
-import { fetchAndCache } from "../lib/utils.js";
+import { fetchAndCache } from "../lib/utils";
 import {
   ammoTypes,
   defaultDamageTypes,
@@ -11,8 +11,8 @@ import {
   tierTypes,
   WeaponLiteFilterableProperties,
   WeaponPropertyDefinitions,
-} from "../types/types.js";
-import { WeaponLite } from "../types/weaponTypes.js";
+} from "../types/types";
+import { WeaponLite } from "../types/weaponTypes";
 
 export type FlattenArray<T> = T extends (infer U)[] ? U : T;
 export type ArrayorMap<T> = T extends Record<any, unknown>

@@ -53,7 +53,7 @@ export function ToggleGroup<T extends NonRecordWeaponLiteProperties>({
   );
 }
 
-type ToggleItemProps<T extends keyof AllWeaponPropertyDefinitions> = {
+type ToggleItemProps = {
   name: string;
   hash: number;
   propertyKey: NonRecordWeaponLiteProperties;
@@ -64,7 +64,8 @@ export function ToggleItem({ name, hash, propertyKey }: ToggleItemProps) {
   );
   const setter = useMemo(() => debounce(setSelectedCategories, 100), []);
   const selected = selectedCategories.has(propertyKey)
-    ? selectedCategories.get(propertyKey)!.has(hash)
+    ? //@ts-ignore TODO
+      selectedCategories.get(propertyKey)!.has(hash)
     : false;
   // if (selectedCategories.size > 0) console.log(selectedCategories);
 
@@ -75,6 +76,7 @@ export function ToggleItem({ name, hash, propertyKey }: ToggleItemProps) {
       } rounded-full px-4 py-[0.1rem] text-[1.1rem] ${
         selected ? "text-gray-900" : "text-gray-300"
       }`}
+      //@ts-ignore TODO
       onClick={() => setter({ hash, weaponPropertyKey: propertyKey })}
     >
       {name}
