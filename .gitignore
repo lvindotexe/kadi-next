@@ -25,7 +25,6 @@ next-env.d.ts
 /lib/useCache/*.json
 
 #build json
-/public/*.json
 /prebuild/**
 /build/**
 
