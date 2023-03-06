@@ -1,24 +1,16 @@
+import { useQuery } from "@tanstack/react-query";
 import { get } from "idb-keyval";
+import { useAtom } from "jotai";
 import { type NextPage } from "next";
 import Head from "next/head";
-
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { NavBar, NavBarSearchInput } from "../components/Navbar";
-import { useWeaponSearch } from "../hooks/search";
-import { debounce, fetchAndCache } from "../lib/utils";
+import { useEffect, useRef } from "react";
+import { NavBar } from "../components/Navbar";
+import { filteredWeaponsAtom, searchInputAtom } from "../hooks/search";
+import { fetchAndCache } from "../lib/utils";
 import { WeaponLite } from "../types/weaponTypes";
-import {
-  elementScroll,
-  useVirtualizer,
-  VirtualizerOptions,
-} from "@tanstack/react-virtual";
-import { IconEaseInOut } from "@tabler/icons-react";
-import { each } from "immer/dist/internal";
 
 export function initialiseHomePage() {
-  //@ts-ignore fix me
   return get("WeaponsLite").then((result) => {
     if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
     else
@@ -61,11 +53,14 @@ export function ItemIcon({ item }: { item: ItemIconProps }) {
   );
 }
 
-function WeaponGrid({ weapons }: { weapons: WeaponLite[] }) {
+function WeaponGrid() {
+  const [filteredWeapons] = useAtom(filteredWeaponsAtom);
+  const [input] = useAtom(searchInputAtom);
+  if (input.length === 0) return null;
   return (
     <>
       <ul className="flex flex-wrap justify-center gap-2">
-        {weapons.map((e) => (
+        {filteredWeapons.map((e) => (
           <li key={e.hash}>
             <Link href={`/w/${e.hash}`}>
               <ItemIcon key={e.hash} item={e} />
@@ -77,19 +72,8 @@ function WeaponGrid({ weapons }: { weapons: WeaponLite[] }) {
   );
 }
 
-function HomePage({ data }: { data: WeaponLite[] }) {
+function HomePage() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const {
-    setInput,
-    filteredWeapons,
-    parameters,
-    updateFilterFunctions,
-    setSortBy,
-    input,
-  } = useWeaponSearch(data, inputRef, "empty");
-  const [showFilters, setShowFilters] = useState(false);
-  const debouncedInput = useMemo(() => debounce(setInput, 100), []);
-
   useEffect(() => {
     if (inputRef && inputRef.current) {
       inputRef.current.focus();
@@ -98,23 +82,8 @@ function HomePage({ data }: { data: WeaponLite[] }) {
 
   return (
     <>
-      <NavBar
-        setInput={setInput}
-        input={input}
-        showFilters={true}
-        setShowFilters={setShowFilters}
-        parameters={parameters}
-        setSortBy={setSortBy}
-        resultsLength={69}
-        updateFilterFunctions={updateFilterFunctions}
-      >
-        <NavBarSearchInput
-          ref={inputRef}
-          setInput={debouncedInput}
-          className="grow rounded-md bg-gray-900 px-2 text-3xl text-white outline-none"
-        />
-      </NavBar>
-      {filteredWeapons && <WeaponGrid weapons={filteredWeapons} />}
+      <NavBar />
+      <WeaponGrid />
     </>
   );
 }
@@ -136,11 +105,12 @@ const Home: NextPage = () => {
         <title>Kadi-One</title>
         <meta name="description" content="A destiny 2 companion app" />
       </Head>
+
       <main className="grid min-h-screen items-center bg-black">
         {status === "loading" ? (
           <div className="text-white">loading</div>
         ) : status === "success" ? (
-          <HomePage data={data} />
+          <HomePage />
         ) : (
           <div>oops</div>
         )}
