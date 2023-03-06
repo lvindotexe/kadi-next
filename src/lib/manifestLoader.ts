@@ -135,7 +135,10 @@ const httpClient = generateHttpClient(
 
 function getManifestMetaData() {
   // return getDestinyManifest(httpClient).then((r) => r.Response);
-  return getDestinyManifest(httpClient).then((r) => r.Response);
+  return getDestinyManifest(httpClient).then((r) => {
+    console.log(r.Response);
+    return r.Response;
+  });
 }
 
 function fetchManifestTables<T extends keyof AllDestinyManifestComponents>(

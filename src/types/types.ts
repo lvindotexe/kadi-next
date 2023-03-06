@@ -114,7 +114,6 @@ export const itemCategories: WeaponPropertyDefinitions<"itemCategory"> = {
     fusion_rifle: 9,
     linear_fusion_rifle: 1504945536,
   },
-
   filterImplementation: (properties, property) =>
     properties.some((e) => property.includes(e)),
 };

@@ -1,14 +1,18 @@
 import { IconCircleX, IconMenu2, IconSearch, IconX } from "@tabler/icons-react";
+import { keys } from "idb-keyval";
 import { atom, useAtom } from "jotai";
 import React, { useMemo, useRef } from "react";
+import { number } from "zod";
 import { useClickOutside } from "../hooks/hooks";
 import {
+  allWeaponPropertyHashes,
   categorisedWeaponsAtom,
   NonRecordWeaponLiteProperties,
+  reversedWeaponPropertyHashes,
   searchInputAtom,
   selectedCategoriesAtom,
 } from "../hooks/search";
-import { debounce } from "../lib/utils";
+import { debounce, isNotNullOrUndefined } from "../lib/utils";
 import {
   AllWeaponPropertyDefinitions,
   ammoTypes,
@@ -34,6 +38,7 @@ export function ToggleGroup<T extends NonRecordWeaponLiteProperties>({
       <p className=" text-xl font-bold text-gray-300">{title}</p>
       <ul className="flex shrink grow flex-wrap gap-2 py-4">
         {Object.entries(weaponPropertyCategories).map(([k, v], index) => (
+          //@ts-ignore compiler annoying
           <ToggleItem key={k + index} name={k} hash={v} propertyKey={key} />
         ))}
       </ul>
@@ -42,30 +47,35 @@ export function ToggleGroup<T extends NonRecordWeaponLiteProperties>({
 }
 
 type ToggleItemProps<T extends keyof AllWeaponPropertyDefinitions> = {
-  name: string;
-  hash: number;
-  propertyKey: NonRecordWeaponLiteProperties;
+  hash: AllWeaponPropertyDefinitions[T]["propertyHashes"][keyof AllWeaponPropertyDefinitions[T]["propertyHashes"]];
+  name: keyof AllWeaponPropertyDefinitions[T]["propertyHashes"];
+  propertyKey: T;
 };
-export function ToggleItem({ name, hash, propertyKey }: ToggleItemProps) {
+export function ToggleItem<T extends keyof AllWeaponPropertyDefinitions>({
+  name,
+  hash,
+  propertyKey,
+}: ToggleItemProps<T>) {
   const [selectedCategories, setSelectedCategories] = useAtom(
     selectedCategoriesAtom
   );
   const setter = useMemo(() => debounce(setSelectedCategories, 100), []);
   const selected = selectedCategories.has(propertyKey)
-    ? selectedCategories.get(propertyKey)!.has(hash)
+    ? //@ts-ignore compiler annoying
+      selectedCategories.get(propertyKey)!.has(hash)
     : false;
-  // if (selectedCategories.size > 0) console.log(selectedCategories);
 
   return (
     <button
       className={`${
         selected ? "bg-gray-300" : "border-[1px] bg-gray-900"
-      } rounded-full px-4 py-[0.1rem] text-[1.1rem] ${
+      } rounded-md px-4 py-[0.1rem] text-[1.1rem] ${
         selected ? "text-gray-900" : "text-gray-300"
       }`}
+      //@ts-ignore
       onClick={() => setter({ hash, weaponPropertyKey: propertyKey })}
     >
-      {name}
+      {name as string}
     </button>
   );
 }
@@ -77,26 +87,39 @@ function SelectedCategories() {
 
   const selectedItems = [...selectedCategories.entries()]
     .flatMap(([key, values]) =>
-      values ? [...values.entries()].map((e) => [key, e] as const) : undefined
+      values ? Array.from(values).map((e) => [key, e] as const) : undefined
     )
-    .filter(Boolean);
-  console.log(selectedItems);
+    .filter(isNotNullOrUndefined);
 
-  if (selectedCategories.size === 0) return null;
-  function handleClick(name: string) {}
+  function handleClick(
+    weaponPropertyKey: NonRecordWeaponLiteProperties,
+    hash: number
+  ) {
+    setSelectedCategories({ hash, weaponPropertyKey });
+  }
+  const hasSelectedItems =
+    selectedCategories.size > 0 &&
+    [...selectedCategories.values()].every((e) => e.size > 0);
   return (
     <>
-      {/* <ul className="flex gap-2 overflow-scroll p-2">
-        {selectedItems.map(([key,value], index) => (
-          <button
-            key={index}
-            className={`rounded-md  bg-gray-700 px-4 py-[0.1rem]  text-white`}
-            onClick={() => handleClick(item)}
-          >
-            {item}
-          </button>
-        ))}
-      </ul> */}
+      {hasSelectedItems && (
+        <ul className="flex gap-2 overflow-scroll p-2">
+          {selectedItems.map(([key, value], index) => (
+            <button
+              key={index}
+              className={`rounded-md  bg-gray-300 px-4 py-[0.1rem]  text-gray-900`}
+              onClick={() => handleClick(key, value)}
+            >
+              {
+                reversedWeaponPropertyHashes[key][value].replace(
+                  "_",
+                  " "
+                ) as string
+              }
+            </button>
+          ))}
+        </ul>
+      )}
     </>
   );
 }

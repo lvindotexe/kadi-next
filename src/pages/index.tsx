@@ -6,7 +6,11 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { NavBar } from "../components/Navbar";
-import { filteredWeaponsAtom, searchInputAtom } from "../hooks/search";
+import {
+  filteredWeaponsAtom,
+  searchInputAtom,
+  selectedCategoriesAtom,
+} from "../hooks/search";
 import { fetchAndCache } from "../lib/utils";
 import { WeaponLite } from "../types/weaponTypes";
 
@@ -56,7 +60,9 @@ export function ItemIcon({ item }: { item: ItemIconProps }) {
 function WeaponGrid() {
   const [filteredWeapons] = useAtom(filteredWeaponsAtom);
   const [input] = useAtom(searchInputAtom);
-  if (input.length === 0) return null;
+  const [selectedCategories] = useAtom(selectedCategoriesAtom);
+
+  if (input.length === 0 && selectedCategories.size === 0) return null;
   return (
     <>
       <ul className="flex flex-wrap justify-center gap-2">

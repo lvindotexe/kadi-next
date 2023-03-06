@@ -101,8 +101,10 @@ export const weaponFiltersAtom = atom((get) => {
     const weaponPropertyDefinition = allWeaponPropertyDefinitions[key];
     if ("filterImplementation" in weaponPropertyDefinition) {
       const filterFn = (weapon: WeaponLite) =>
-        //@ts-ignore close enough
-        weaponPropertyDefinition.filterImplementation(categories, weapon);
+        weaponPropertyDefinition.filterImplementation(
+          Array.from(categories),
+          weapon[key]
+        );
       result.set(key, filterFn);
     }
   }
@@ -171,15 +173,19 @@ function categoriser<
   let result: pain | undefined;
   if (weaponProperty instanceof Array) {
     for (const prop of possibleProps) {
-      if (weaponProperty.includes(prop) && prop in reversedTypes[key]) {
+      if (
+        weaponProperty.includes(prop) &&
+        prop in reversedWeaponPropertyHashes[key]
+      ) {
         //@ts-ignore
-        result = reversedTypes[key][prop];
+        result = reversedWeaponPropertyHashes[key][prop];
       }
     }
   } else {
     for (const prop of possibleProps) {
       //@ts-ignore
-      if (weaponProperty === prop) result = reversedTypes[key][prop];
+      if (weaponProperty === prop)
+        result = reversedWeaponPropertyHashes[key][prop];
     }
   }
   return result;
@@ -215,7 +221,7 @@ type ReversedWeaponCategoryHashes = {
     WeaponPropertyDefinitions<key>["propertyHashes"]
   >;
 };
-const reversedTypes: ReversedWeaponCategoryHashes = {
+export const reversedWeaponPropertyHashes: ReversedWeaponCategoryHashes = {
   ammoType: flipper(ammoTypes.propertyHashes),
   defaultDamageType: flipper(defaultDamageTypes.propertyHashes),
   equipmentSlotTypeHash: flipper(equipmentSlotTypes.propertyHashes),
