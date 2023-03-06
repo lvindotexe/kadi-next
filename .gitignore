@@ -25,7 +25,9 @@ next-env.d.ts
 /lib/useCache/*.json
 
 #build json
-/public
+/public/*.json
+/prebuild/**
+/build/**
 
 # misc
 .DS_Store
