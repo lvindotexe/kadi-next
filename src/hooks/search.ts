@@ -96,7 +96,9 @@ export const weaponCategoriserAtom = atom((get) => {
 });
 
 export const weaponFiltersAtom = atom((get) => {
-  const selectedCategories = get(selectedCategoriesAtom);
+  const selectedCategories = [...get(selectedCategoriesAtom).entries()].filter(
+    ([_, v]) => v.size > 0
+  );
   const result = new Map<NonRecordWeaponLiteProperties, FilterFunction>();
   for (const [key, categories] of selectedCategories) {
     const weaponPropertyDefinition = allWeaponPropertyDefinitions[key];
@@ -109,6 +111,7 @@ export const weaponFiltersAtom = atom((get) => {
       result.set(key, filterFn);
     }
   }
+  console.log({ result, selectedCategories });
   return result;
 });
 
@@ -150,7 +153,6 @@ export const filteredWeaponsAtom = atom(async (get) => {
   const searchInput = get(searchInputAtom);
   const hasFilters =
     weaponFiters.length > 0 && [...weaponFiters.values()].every((e) => !!e);
-  console.log({ size: weaponsLite.length, weaponFiters, hasFilters });
   return weaponsLite.filter((e) =>
     hasFilters
       ? e.name.toLowerCase().includes(searchInput) &&

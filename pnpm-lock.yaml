@@ -23,6 +23,7 @@ specifiers:
   immer: ^9.0.19
   jotai: ^2.0.3
   jotai-tanstack-query: ^0.6.0
+  jotai-trpc: ^0.5.0
   next: 13.1.6
   postcss: ^8.4.14
   prettier: ^2.8.1
@@ -53,6 +54,7 @@ dependencies:
   immer: 9.0.19
   jotai: 2.0.3_react@18.2.0
   jotai-tanstack-query: 0.6.0_nszgul5pp5pqeimqt2ca3h73eu
+  jotai-trpc: 0.5.0_755eepcxis63aqzc5jztkhe6lq
   next: 13.1.6_pjwopsidmaokadturxaafygjp4
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -5080,6 +5082,18 @@ packages:
       jotai: '>=1.11.0'
     dependencies:
       '@tanstack/query-core': 4.26.0
+      jotai: 2.0.3_react@18.2.0
+    dev: false
+
+  /jotai-trpc/0.5.0_755eepcxis63aqzc5jztkhe6lq:
+    resolution: {integrity: sha512-v+tb2zk33/pHmveZwH9wfnVw0IxrGdw/XfQr+0Van8h0P3o1hxU8FkLGyDr0UUtJIRCNMmJZH8hI/MivjbVh+A==}
+    peerDependencies:
+      '@trpc/client': '>=10.0.0'
+      '@trpc/server': '>=10.0.0'
+      jotai: '>=1.11.0'
+    dependencies:
+      '@trpc/client': 10.12.0_@trpc+server@10.12.0
+      '@trpc/server': 10.12.0
       jotai: 2.0.3_react@18.2.0
     dev: false
 

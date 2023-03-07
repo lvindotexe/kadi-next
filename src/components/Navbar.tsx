@@ -90,16 +90,20 @@ function SelectedCategories() {
       values ? Array.from(values).map((e) => [key, e] as const) : undefined
     )
     .filter(isNotNullOrUndefined);
-
-  function handleClick(
-    weaponPropertyKey: NonRecordWeaponLiteProperties,
-    hash: number
-  ) {
-    setSelectedCategories({ hash, weaponPropertyKey });
-  }
+  //TODO apparently memoizing and debouncing this fixes reset to Suspense fallback on click
+  const setter = useMemo(
+    () =>
+      debounce(
+        (hash: number, weaponPropertyKey: NonRecordWeaponLiteProperties) =>
+          setSelectedCategories({ hash, weaponPropertyKey }),
+        50
+      ),
+    []
+  );
   const hasSelectedItems =
     selectedCategories.size > 0 &&
-    [...selectedCategories.values()].every((e) => e.size > 0);
+    [...selectedCategories.values()].some((e) => e.size > 0);
+
   return (
     <>
       {hasSelectedItems && (
@@ -108,7 +112,7 @@ function SelectedCategories() {
             <button
               key={index}
               className={`rounded-md  bg-gray-300 px-4 py-[0.1rem]  text-gray-900`}
-              onClick={() => handleClick(key, value)}
+              onClick={() => setter(value, key)}
             >
               {
                 reversedWeaponPropertyHashes[key][value].replace(

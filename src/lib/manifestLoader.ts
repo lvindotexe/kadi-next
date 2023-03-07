@@ -136,7 +136,6 @@ const httpClient = generateHttpClient(
 function getManifestMetaData() {
   // return getDestinyManifest(httpClient).then((r) => r.Response);
   return getDestinyManifest(httpClient).then((r) => {
-    console.log(r.Response.version);
     return r.Response;
   });
 }

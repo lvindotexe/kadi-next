@@ -1,28 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-import { get } from "idb-keyval";
 import { useAtom } from "jotai";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { NavBar } from "../components/Navbar";
-import {
-  filteredWeaponsAtom,
-  searchInputAtom,
-  selectedCategoriesAtom,
-} from "../hooks/search";
-import { fetchAndCache } from "../lib/utils";
-import { WeaponLite } from "../types/weaponTypes";
-
-export function initialiseHomePage() {
-  return get("WeaponsLite").then((result) => {
-    if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
-    else
-      return fetchAndCache("/api/WeaponsLite", "WeaponsLite") as Promise<
-        WeaponLite[]
-      >;
-  });
-}
+import { filteredWeaponsAtom, weaponsLiteAtom } from "../hooks/search";
+import { trpc } from "../lib/trpc";
 
 type ItemIconProps = {
   iconWatermark?: string;
@@ -59,16 +42,12 @@ export function ItemIcon({ item }: { item: ItemIconProps }) {
 
 function WeaponGrid() {
   const [filteredWeapons] = useAtom(filteredWeaponsAtom);
-  const [input] = useAtom(searchInputAtom);
-  const [selectedCategories] = useAtom(selectedCategoriesAtom);
-
-  if (input.length === 0 && selectedCategories.size === 0) return null;
   return (
     <>
       <ul className="flex flex-wrap justify-center gap-2">
         {filteredWeapons.map((e) => (
           <li key={e.hash}>
-            <Link href={`/w/${e.hash}`}>
+            <Link href={`/weapons/${e.hash}`}>
               <ItemIcon key={e.hash} item={e} />
             </Link>
           </li>
@@ -79,13 +58,17 @@ function WeaponGrid() {
 }
 
 function HomePage() {
+  const { status, data } = trpc.weapons.useQuery();
+  const [_, setWeapons] = useAtom(weaponsLiteAtom);
   const inputRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
     if (inputRef && inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
-
+    if (status === "success") setWeapons(data);
+  }, [status]);
+  if (status !== "success")
+    return <div className="bg-red-400 text-black">loading...</div>;
   return (
     <>
       <NavBar />
@@ -95,16 +78,6 @@ function HomePage() {
 }
 
 const Home: NextPage = () => {
-  const { status, data } = useQuery(["manifestversion"], () =>
-    get("WeaponsLite").then((result) => {
-      if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
-      else
-        return fetchAndCache("/api/WeaponsLite", "WeaponsLite") as Promise<
-          WeaponLite[]
-        >;
-    })
-  );
-
   return (
     <>
       <Head>
@@ -113,13 +86,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main className="grid min-h-screen items-center bg-black">
-        {status === "loading" ? (
-          <div className="text-white">loading</div>
-        ) : status === "success" ? (
-          <HomePage />
-        ) : (
-          <div>oops</div>
-        )}
+        <HomePage />
       </main>
     </>
   );
