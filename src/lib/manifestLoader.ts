@@ -136,7 +136,7 @@ const httpClient = generateHttpClient(
 function getManifestMetaData() {
   // return getDestinyManifest(httpClient).then((r) => r.Response);
   return getDestinyManifest(httpClient).then((r) => {
-    console.log(r.Response);
+    console.log(r.Response.version);
     return r.Response;
   });
 }
@@ -255,7 +255,7 @@ export function loadManifest() {
     })
     .then(([manifestTables, categorisedItems]) => {
       const weapons = categorisedItems.get("Weapons")!;
-      const [statGroups, statDefs, plugSets] = [
+      const [statGroups, statDefs, plugSets, sandboxPerks] = [
         manifestTables.get(
           "DestinyStatGroupDefinition"
         )! as DestinyStatGroupDefinition[],
@@ -263,8 +263,12 @@ export function loadManifest() {
         manifestTables.get(
           "DestinyPlugSetDefinition"
         )! as DestinyPlugSetDefinition[],
+        manifestTables.get(
+          "DestinySandboxPerkDefinition"
+        ) as DestinySandboxPerkDefinition[],
       ];
       const liteWeapons = [];
+      const transformedWeapons = [];
       const weaponCategoryStatGroupMap = new Map<number, number>();
       function addToStatGroupMap(item: DestinyInventoryItemDefinition) {
         for (const cat of item.itemCategoryHashes!) {
@@ -274,6 +278,15 @@ export function loadManifest() {
       }
       for (const weapon of weapons) {
         addToStatGroupMap(weapon);
+        const transformedWeapon = transformWeapon(
+          weapon,
+          categorisedItems,
+          plugSets,
+          statGroups,
+          statDefs,
+          sandboxPerks
+        );
+
         const result = transformWeaponLite(
           weapon,
           categorisedItems,
@@ -282,12 +295,14 @@ export function loadManifest() {
           statDefs
         );
         liteWeapons.push(result);
+        transformedWeapons.push(transformedWeapon);
       }
       return [
         manifestTables,
         categorisedItems,
         new Map()
           .set("WeaponsLite", liteWeapons)
+          .set("Weapons", transformedWeapons)
           .set("WeaponCategoryStatGroupMap", weaponCategoryStatGroupMap),
       ] as const;
     });

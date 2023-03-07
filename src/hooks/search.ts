@@ -1,9 +1,11 @@
+import { getDestinyManifest } from "bungie-api-ts/destiny2";
 import { get as idbGet } from "idb-keyval";
 import { atom } from "jotai";
 import { atomsWithQuery } from "jotai-tanstack-query";
-import { MutableRefObject, useState } from "react";
-import { fetchAndCache } from "../lib/utils";
+import { fetchAndCache, generateHttpClient, notFetch } from "../lib/utils";
 import {
+  AllWeaponPropertyDefinitions,
+  allWeaponPropertyDefinitions,
   ammoTypes,
   defaultDamageTypes,
   equipmentSlotTypes,
@@ -11,8 +13,6 @@ import {
   tierTypes,
   WeaponLiteFilterableProperties,
   WeaponPropertyDefinitions,
-  AllWeaponPropertyDefinitions,
-  allWeaponPropertyDefinitions,
 } from "../types/types";
 import { WeaponLite } from "../types/weaponTypes";
 
@@ -54,7 +54,6 @@ type zain = PropertyHashes<
 
 //atoms
 export const searchInputAtom = atom("", (get, set, input: string) => {
-  console.log(input);
   set(searchInputAtom, input.toLowerCase());
 });
 
@@ -86,7 +85,9 @@ export const weaponCategoriserAtom = atom((get) => {
     NonRecordWeaponLiteProperties,
     (weapon: WeaponLite) => pain | undefined
   >();
-  for (const [key, categories] of selectedCategories) {
+  for (const [key, categories] of [...selectedCategories.entries()].filter(
+    ([k, v]) => v.size > 0
+  )) {
     result.set(key, (weapon: WeaponLite) =>
       categoriser(key, Array.from(categories), weapon[key])
     );
@@ -111,20 +112,37 @@ export const weaponFiltersAtom = atom((get) => {
   return result;
 });
 
-const [weaponsLiteAtom] = atomsWithQuery((get) => ({
-  queryKey: ["weapons"],
-  queryFn: () => {
-    if (process.title === "browser") {
-      return idbGet("WeaponsLite").then((result) => {
-        if (result) return Promise.resolve(result) as Promise<WeaponLite[]>;
-        else
-          return fetchAndCache("/api/WeaponsLite", "WeaponsLite").then((r) =>
-            r.slice(0, 10)
-          ) as Promise<WeaponLite[]>;
-      });
-    } else return Promise.resolve(new Array<WeaponLite>());
-  },
-}));
+function getInitialData() {
+  return idbGet("version").then((version) => {
+    if (!version) {
+      return notFetch<string>("/api/version").then(() =>
+        notFetch<WeaponLite[]>("/api/WeaponsLite")
+      );
+    } else if (version) {
+      const httpClient = generateHttpClient(
+        fetch,
+        "d1f18c12540e4df3b1cea9ee418fb234"
+      );
+      return getDestinyManifest(httpClient)
+        .then((response) => response.Response.version === version)
+        .then((isUptoDate) => {
+          if (!isUptoDate)
+            return fetchAndCache<WeaponLite[]>(
+              "/api/WeaponsLite",
+              "weaponsLite"
+            );
+          else return idbGet<WeaponLite[]>("weaponsLite");
+        });
+    }
+  });
+}
+
+export const weaponsLiteAtom = atom(
+  new Array<WeaponLite>(),
+  (get, set, weapons: WeaponLite[]) => {
+    set(weaponsLiteAtom, weapons);
+  }
+);
 
 export const filteredWeaponsAtom = atom(async (get) => {
   const weaponsLite = await get(weaponsLiteAtom);
@@ -132,10 +150,11 @@ export const filteredWeaponsAtom = atom(async (get) => {
   const searchInput = get(searchInputAtom);
   const hasFilters =
     weaponFiters.length > 0 && [...weaponFiters.values()].every((e) => !!e);
+  console.log({ size: weaponsLite.length, weaponFiters, hasFilters });
   return weaponsLite.filter((e) =>
     hasFilters
       ? e.name.toLowerCase().includes(searchInput) &&
-        weaponFiters.some((fn) => fn(e))
+        weaponFiters.every((fn) => fn(e))
       : e.name.toLowerCase().includes(searchInput)
   );
 });
@@ -228,20 +247,3 @@ export const reversedWeaponPropertyHashes: ReversedWeaponCategoryHashes = {
   itemCategory: flipper(itemCategories.propertyHashes),
   tierTypeHash: flipper(tierTypes.propertyHashes),
 };
-
-// export function useWeaponFilter() {}
-
-function useInputElement(
-  inputElement: MutableRefObject<HTMLInputElement | null>
-) {
-  const [input, setInputState] = useState(
-    inputElement && inputElement.current ? inputElement.current.value : ""
-  );
-  function setInput(newInput: string) {
-    setInputState(newInput);
-    if (inputElement && inputElement.current) {
-      inputElement.current.value = newInput;
-    }
-  }
-  return [input, setInput] as const;
-}

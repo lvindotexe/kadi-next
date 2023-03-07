@@ -3,9 +3,7 @@ import {
   DestinyManifest,
 } from "bungie-api-ts/destiny2";
 import { HttpClientConfig } from "bungie-api-ts/http";
-import exp from "constants";
 import { set } from "idb-keyval";
-import { Url } from "url";
 import { DatabaseTables } from "../types/types.js";
 
 export function isNotNullOrUndefined<T extends object>(
@@ -88,11 +86,13 @@ export function getManifestTables<T extends keyof DatabaseTables>(tables: T[]) {
     }, Promise.resolve(new Map<T, DatabaseTables[T]>()));
 }
 
-export function fetchAndCache(urlString: string, cacheKey: string) {
-  return fetch(urlString)
-    .then((r) => r.json())
-    .then((json) => {
-      set(cacheKey, json);
-      return json;
-    });
+export function fetchAndCache<T>(urlString: string, cacheKey: string) {
+  return notFetch<T>(urlString).then((result) => {
+    set(cacheKey, result);
+    return result;
+  });
+}
+
+export function notFetch<T>(urlString: string) {
+  return fetch(urlString).then((r) => r.json() as T);
 }
