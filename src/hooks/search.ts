@@ -106,6 +106,7 @@ export const weaponFiltersAtom = atom((get) => {
       const filterFn = (weapon: WeaponLite) =>
         weaponPropertyDefinition.filterImplementation(
           Array.from(categories),
+          //@ts-ignore TODO
           weapon[key]
         );
       result.set(key, filterFn);
@@ -205,6 +206,7 @@ function categoriser<
     for (const prop of possibleProps) {
       //@ts-ignore
       if (weaponProperty === prop)
+        //@ts-ignore TODO
         result = reversedWeaponPropertyHashes[key][prop];
     }
   }

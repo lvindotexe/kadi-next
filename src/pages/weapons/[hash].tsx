@@ -35,6 +35,7 @@ const selectedPerksAtom = atom(
     const { column, trait } = props;
     const selectedPerks = get(selectedPerksAtom);
     selectedPerks.set(column, trait);
+    //@ts-ignore TODO
     set(selectedPerksAtom, new Map(selectedPerks));
   }
 );

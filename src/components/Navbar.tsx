@@ -95,6 +95,7 @@ function SelectedCategories() {
     () =>
       debounce(
         (hash: number, weaponPropertyKey: NonRecordWeaponLiteProperties) =>
+          //@ts-ignore TODO
           setSelectedCategories({ hash, weaponPropertyKey }),
         50
       ),
@@ -115,6 +116,7 @@ function SelectedCategories() {
               onClick={() => setter(value, key)}
             >
               {
+                //@ts-ignore TODO
                 reversedWeaponPropertyHashes[key][value].replace(
                   "_",
                   " "

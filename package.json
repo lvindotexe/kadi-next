@@ -9,7 +9,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "prebuild": " node --loader ts-node/esm src/scripts/prebuild.ts "
+    "prebuild": "ts-node-esm src/scripts/prebuild.ts --project lib.tsconfig.json -T"
   },
   "dependencies": {
     "@next/env": "^13.1.6",
