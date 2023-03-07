@@ -68,16 +68,14 @@ const setMasterWorkAtom = atom(null, (get, set, masterWork: MasterWork) => {
 export default function WeaponPage(
   props: InferGetServerSidePropsType<typeof getStaticProps>
 ) {
-  const { hash } = props;
-  const { status, data } = trpc.weaponByID.useQuery(hash);
-  if (status !== "success") return <div>loading...</div>;
+  const { weapon } = props;
   return (
     <>
       <Head>
-        <title>{data.name}</title>
+        <title>{weapon.name}</title>
       </Head>
       <main>
-        <WeaponBanner weapon={data} />
+        <WeaponBanner weapon={weapon} />
       </main>
     </>
   );
@@ -156,9 +154,10 @@ export async function getStaticProps(
 
   const hash = context.params!.hash;
   await ssgHelper.weaponByID.prefetch(hash);
+  const weapon = await ssgHelper.weaponByID.fetch(hash);
   return {
     props: {
-      hash,
+      weapon,
     },
   };
 }

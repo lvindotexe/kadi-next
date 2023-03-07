@@ -4,12 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "testbuild": "npm run prebuild && npm run build",
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "prebuild": "ts-node-esm src/scripts/prebuild.ts --project lib.tsconfig.json -T"
+    "prebuild": "ts-node-esm src/scripts/prebuild.ts --project lib.tsconfig.json",
+    "testbuild": "pnpm prebuild && pnpm build && pnpm start"
   },
   "dependencies": {
     "@next/env": "^13.1.6",
