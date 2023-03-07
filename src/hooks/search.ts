@@ -111,7 +111,6 @@ export const weaponFiltersAtom = atom((get) => {
       result.set(key, filterFn);
     }
   }
-  console.log({ result, selectedCategories });
   return result;
 });
 

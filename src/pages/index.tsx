@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { Suspense, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { NavBar } from "../components/Navbar";
 import { filteredWeaponsAtom, weaponsLiteAtom } from "../hooks/search";
 import { trpc } from "../lib/trpc";
